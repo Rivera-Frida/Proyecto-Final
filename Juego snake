@@ -1,0 +1,79 @@
+import pygame, sys, time, random
+
+pygame.init()
+
+play_surface = pygame.display.set_mode((500,500)) #variable que va a contener la pantalla del videojuego
+font = pygame.font.Font(None, 30) #ponemos tipo de letra
+fps = pygame.time.Clock()
+
+def food():#definimos para hacer la comida 
+    random_pos = random.randint(0,49)*10
+    food_pos = [random_pos,random_pos]
+    return food_pos #nos devuelve dos números aleatorios de la multiplicación donde se hubicará la comida
+
+
+def main():
+    snake_pos = [100, 50] #cabeza de la serpiente
+    snake_body = [[100,50],[90,50],[80,50]] #cuerpo de la serpiente
+    change = "RIGHT"
+    run = True
+    food_pos = food() #va a valer lo que vale food_pos, los dos números
+    score = 0
+
+    while run:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.KEYDOWN: #haremos que la serpiente se mueva
+                if event.key == pygame.K_RIGHT: 
+                    change = "RIGHT" #hace que se mueva en dirección a la derecha
+                if event.key == pygame.K_LEFT:
+                    change = "LEFT" #dirección izquierda
+                if event.key == pygame.K_UP:
+                    change = "UP" #dirección hacia arriba
+                if event.key == pygame.K_DOWN:
+                    change = "DOWN" #dirección hacia abajo
+            if change == "RIGHT": 
+                snake_pos[0] += 10 #efecto de que se mueve
+            if change == "LEFT":
+                snake_pos[0] -= 10
+            if change == "UP":
+                snake_pos[1] -= 10 #resta porque nos acercamos a la y
+            if change == "DOWN":
+                snake_pos[1] += 10 #sumas porque nos alejamos de y
+
+            snake_body.insert(0,list(snake_pos)) #añadimos al cuerpo lo que hemos sumado o restado al cuerpo
+            if snake_pos == food_pos: #la cabeza de la serpiente está en la misma posición que la de la comida
+                food_pos = food() #si esto sucede la comida se irá a otro sitio
+                score += 1
+                print(score)
+            else:
+                snake_body.pop()
+
+            play_surface.fill((0,0,0)) #pintamos la pantalla
+
+            for pos in snake_body:#creamos el cuerpo de la serpiente
+                pygame.draw.rect(play_surface,(200,200,200),pygame.Rect(pos[0],pos[1],10,10))
+        
+            pygame.draw.rect(play_surface,(169,6,6),pygame.Rect(food_pos[0],food_pos[1],10,10)) #dibujamos la manzana
+            text = font.render(str(score),0,(200,60,80)) #marcamos la puntuación
+            play_surface.blit(text,(480,20))
+        
+            if score < 10: #con una puntuación menor a 10 va lento
+                fps.tick(10)
+            if score >= 10: #con una puntuación mayor o igual la velocidad aumenta
+                fps.tick(20)
+
+            if snake_pos[0] <= 0 or snake_pos[0] >= 500:
+                run = False
+                print("YOU LOSE")
+            if snake_pos[1] <= 0 or snake_pos[1] >= 500:
+                run = False 
+                print("YOU LOSE")
+                
+            pygame.display.flip()
+        
+
+main()
+
+pygame.quit()
